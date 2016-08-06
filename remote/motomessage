@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+""" motomessage: Connect to a YASNAC ERC and display a console message """
+import argparse
+import sys
+
+import erc
+
+
+def main():
+    """
+    primary function for command-line execution. return an exit status integer
+    or a bool type (where True indicates successful exection)
+    """
+    argp = argparse.ArgumentParser(description=(
+        "Connect to a YASNAC ERC and display a console message"))
+    argp.add_argument('message', help=(
+        "The message to display on the ERC console. MAX 28 characters!"))
+    argp.add_argument('-d', '--debug', action="store_true", help=(
+        "Enable transaction debugging output"))
+    args = argp.parse_args()
+
+    erc.DEBUG = args.debug
+
+    # now actually do stuff
+    if len(args.message) > 28:
+        sys.stderr.write((
+            "WARNING: Message truncated to ERC max of 28 characters. Your "
+            "message is {} characters.").format(len(args.message)))
+
+    robot = erc.ERC()
+    robot.execute_command("MDSP {}\r".format(args.message[:28]))
+
+    return True
+
+
+if __name__ == '__main__':
+    RESULT = main()
+    sys.exit(int(not RESULT if isinstance(RESULT, bool) else RESULT))
